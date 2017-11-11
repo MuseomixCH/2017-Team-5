@@ -1,0 +1,19 @@
+{
+  "name": "com.museomix.team5",
+  "version": "1.0.0",
+  "description": "projet fete la place",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MuseomixCH/2017-Team-5.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MuseomixCH/2017-Team-5/issues"
+  },
+  "homepage": "https://github.com/MuseomixCH/2017-Team-5#readme"
+}
