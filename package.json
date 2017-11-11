@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/MuseomixCH/2017-Team-5/issues"
   },
-  "homepage": "https://github.com/MuseomixCH/2017-Team-5#readme"
+  "homepage": "https://github.com/MuseomixCH/2017-Team-5#readme",
+  "devDependencies": {
+    "nodemon": "^1.12.1"
+  },
+  "dependencies": {
+    "express": "^4.16.2"
+  }
 }
