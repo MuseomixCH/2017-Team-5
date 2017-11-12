@@ -29,7 +29,7 @@ def init(device_changed):
 		sound5.set_volume(100)
 	
 	while pygame.mixer.music.get_busy(): 
-    pygame.time.Clock().tick(10)
+		pygame.time.Clock().tick(10)
 	
 def unmute_a_song (device_id):
 	if(device_id == 1):
@@ -39,7 +39,7 @@ def unmute_a_song (device_id):
 	else if(device_id == 3):
 		sound3.set_volume(100)
 	else if(device_id == 4):
-		sound5.set_volume(100)
+		sound4.set_volume(100)
 		
 def mute ():
 	sound1.set_volume(0)
