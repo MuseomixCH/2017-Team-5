@@ -20,21 +20,18 @@
 #define PIXEL3_PIN    D8    // Digital IO pin connected to the NeoPixels.
 
 #define PIXEL_COUNT 147
-#define FADEOUTDELAY 1000
+#define FADEOUTDELAY 10
 #define FADEOUTSTEP  3
 #define MINWHITE     15
 
 
 
-const char* ssid = "yourNetworkName";
-const char* password = "yourNetworkPassword";
-const char* mqtt_server = "192.168.0.2";
+const char* ssid = "museomix-team5";
+const char* password = "museomix";
+const char* mqtt_server = "192.168.1.103";
 
-WiFiClient espClie
-PubSubClient client(espnt;Client);
-long lastMsg = 0;
-char msg[50];
-int value = 0;
+//WiFiClient espClient;
+//PubSubClient client(espClient);
 
 // Parameter 1 = number of pixels in strip,  neopixel stick has 8
 // Parameter 2 = pin number (most are valid)
@@ -48,7 +45,6 @@ Adafruit_NeoPixel strip1 = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL1_PIN, NEO_GRB + 
 Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL2_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel strip3 = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL3_PIN, NEO_GRB + NEO_KHZ800);
 
-
 ButtonDebounce button0(BUTTON0_PIN, DEBOUNCE_DELAY);
 ButtonDebounce button1(BUTTON1_PIN, DEBOUNCE_DELAY);
 ButtonDebounce button2(BUTTON2_PIN, DEBOUNCE_DELAY);
@@ -59,19 +55,13 @@ typedef struct pixel {
   int g;
   int b;
   int br;
-  
+  boolean button_state;
 } pixel_t;
 
-pixel_t st0 = {255, 255, 255, 15};
-pixel_t st1 = {255, 255, 255, 15};
-pixel_t st2 = {255, 255, 255, 15};
-pixel_t st3 = {255, 255, 255, 15};
-
-int changed;
-
-
-//bool oldState = HIGH;
-//int showType = 1;
+pixel_t st0 = {255, 255, 255, 15, HIGH};
+pixel_t st1 = {255, 255, 255, 15, HIGH};
+pixel_t st2 = {255, 255, 255, 15, HIGH};
+pixel_t st3 = {255, 255, 255, 15, HIGH};
 
 void setup_wifi() {
 
@@ -95,16 +85,15 @@ void setup_wifi() {
 }
 
 void setup() {
-  Serial.begin(115200);
-  setup_wifi();
+  Serial.begin(9600);
+//  setup_wifi();
 
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+//  client.setServer(mqtt_server, 1883);
 
-  pinMode(INPUT_PULLUP, BUTTON0_PIN);
-  pinMode(INPUT_PULLUP, BUTTON1_PIN);
-  pinMode(INPUT_PULLUP, BUTTON2_PIN);
-  pinMode(INPUT_PULLUP, BUTTON3_PIN);
+  pinMode(BUTTON0_PIN,INPUT_PULLUP);
+  pinMode(BUTTON1_PIN,INPUT_PULLUP);
+  pinMode(BUTTON2_PIN,INPUT_PULLUP);
+  pinMode(BUTTON3_PIN,INPUT_PULLUP);
 
   strip0.begin();
   strip1.begin();
@@ -114,34 +103,6 @@ void setup() {
   strip1.show();
   strip2.show();
   strip3.show();
-  changed = millis() + FADEOUTDELAY;
-
-  
-}
-
-
-void callback(char* topic, byte* payload, unsigned int length) {
-
-}
-
-
-void send_button_state(int b){
-
-  switch(b){
-    case 1:
-      if (client.connect("arduinoClient")) {
-        client.publish("outTopic","hello world")
-      }
-      break;
-    case 2:
-      break;
-    case 3:
-      break;
-    case 4:
-      break;
-    default:
-      break;
-  }
   
 }
 
@@ -150,39 +111,6 @@ void update_buttons(){
   button1.update();
   button2.update();
   button3.update();
-}
-
-void fader(int strip, int r, int g, int b, int br) {
-
-  switch(strip){
-    case 0:
-      st0.r = abs(st0.r - r ) < FADEOUTSTEP ?  r : st0.r;
-      st0.r = st0.r > r ? st0.r - FADEOUTSTEP : st0.r;
-      st0.r = st0.r < r ? st0.r + FADEOUTSTEP : st0.r;
-      st0.g = abs(st0.g - g ) < FADEOUTSTEP ?  g : st0.g;
-      st0.g = st0.g > g ? st0.g - FADEOUTSTEP : st0.g;
-      st0.g = st0.g < g ? st0.g + FADEOUTSTEP : st0.g;
-      st0.b = abs(st0.b - b ) < FADEOUTSTEP ?  b : st0.b;
-      st0.b = st0.b > b ? st0.b - FADEOUTSTEP : st0.b;
-      st0.b = st0.b < b ? st0.b + FADEOUTSTEP : st0.b;
-      st0.br = abs(st0.br - br ) < FADEOUTSTEP ?  b : st0.b;
-      st0.br = st0.br > br ? st0.br - FADEOUTSTEP : st0.br;
-      st0.br = st0.br < br ? st0.br + FADEOUTSTEP : st0.br;
-      strip_colors(0, st0.r, st0.g, st0.b, st0.br);
-      strip0.setBrightness(st0.br);
-      strip0.show();
-
-      Serial.println(st0.g);
-      break;
-
-    case 1:
-      break;
-    default:
-      break;
-    
-  }
-  
-  
 }
 
 
@@ -207,68 +135,61 @@ void strip_colors(int strip, int r, int g, int b, int br){
         for (i = 0; i < PIXEL_COUNT; i++ )
           strip2.setPixelColor(i, r, g, b);
         strip2.setBrightness(br);
-        strip3.show();
+        strip2.show();
         break;
     default:
         for (i = 0; i < PIXEL_COUNT; i++ )
           strip3.setPixelColor(i, r, g, b);
-          strip3.setBrightness(br);
-          strip3.show();
+        strip3.setBrightness(br);
+        strip3.show();
   }
 }
 
 void loop() {
   // Get current button state.
   update_buttons();
-  
+
   if(button0.state() == LOW) {
     strip_colors(0, 255, 0, 0, 255);
-    send_button_state(0);
  
   } else if (button1.state() == LOW){
-    strip_colors(0, 255, 0, 0, 255);
-    send_button_state(1);
+    strip_colors(1, 0, 0, 255, 255);
 
   } else if (button2.state() == LOW){
-    strip_colors(0, 255, 0, 0, 255);
-    send_button_state(2);
+    strip_colors(2, 0, 255, 255, 255);
     
   } else if (button3.state() == LOW){
-    strip_colors(0, 255, 0, 0, 255);
-    send_button_state(3);
+    strip_colors(3, 0, 255, 0, 255);
 
   } else {
-
-      if(changed < millis() ){
-        fader(0, 255, 255, 255, 15);
-        changed = millis() + FADEOUTDELAY;
-      } 
+    strip_colors(0, 255, 255, 255, 25);
+    strip_colors(1, 255, 255, 255, 25);
+    strip_colors(2, 255, 255, 255, 25);
+    strip_colors(3, 255, 255, 255, 25);
   }
   
 }
 
-/*==========================
- * 
- * 
- ===========================*/
+
 void startShow(int i) {
+  
   switch(i){
-    case 0: colorWipe(strip1.Color(0, 0, 0), 0);    // Black/off
+    case 0: colorWipe(strip0.Color(0, 0, 0), 0);    // Black/off
             break;
-    case 1: strip1.setBrightness(brightness);
-            colorWipe(strip1.Color(255, 0, 0), 0);  // Red
+    case 1: strip0.setBrightness(255);
+            colorWipe(strip0.Color(255, 0, 0), 0);  // Red
             break;
-    case 2: colorWipe(strip1.Color(0, 255, 0), 0);  // Green
+    case 2: colorWipe(strip0.Color(0, 255, 0), 0);  // Green
             break;
-    case 3: colorWipe(strip1.Color(0, 0, 255), 0);  // Blue
+    case 3: colorWipe(strip0.Color(0, 0, 255), 0);  // Blue
             break;
-    case 4: strip1.setBrightness(brightness);
-            colorWipe(strip1.Color(255, 255, 255), 0); // White
+    case 4: strip1.setBrightness(255);
+            colorWipe(strip0.Color(255, 255, 255), 0); // White
             strip1.show();
             break;
-    case 5: theaterChase(strip1.Color(127,   0,   0), 50); // Red
+    case 5: theaterChase(strip0.Color(127,   0,   0), 50); // Red
             break;
-    case 6: theaterChase(strip1.Color(  0,   0, 127), 50); // Blue
+    case 6: theaterChase(strip0.Color(  0,   0, 127), 50); // Blue
             break;
     case 7: rainbow(20);
             break;
@@ -352,6 +273,7 @@ void theaterChaseRainbow(uint8_t wait) {
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
 uint32_t Wheel(byte WheelPos) {
+
   WheelPos = 255 - WheelPos;
   if(WheelPos < 85) {
     return strip1.Color(255 - WheelPos * 3, 0, WheelPos * 3);
